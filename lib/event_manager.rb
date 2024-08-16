@@ -8,7 +8,8 @@ file = "../event_attendees.csv"
 civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
 # puts civic_info.methods
 # p civic_info.method(:representative_info_by_address).parameters
-civic_info.key = "AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw"
+# civic_info.key = "AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw"
+civic_info.key = File.read('../secret.key').strip
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, "0")[0..4]
@@ -35,7 +36,7 @@ def find_legislators(file, civic_info)
       legislators = []
     end
     legislators.each do |legislator|
-      # puts "#{name} #{city} #{state} #{zipcode} #{legislator.name} #{legislator.party}"
+      puts "#{name} #{city} #{state} #{zipcode} #{legislator.name} #{legislator.party}"
     end
   end
 end
