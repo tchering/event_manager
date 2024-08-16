@@ -1,36 +1,45 @@
 require "csv"
 require "google/apis/civicinfo_v2"
+require "pry-byebug"
+require "pp"
+
+file = "../event_attendees.csv"
 
 civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
-civic_info.key = "AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw"
-
 # puts civic_info.methods
+# p civic_info.method(:representative_info_by_address).parameters
+civic_info.key = File.read("../secret.key").strip
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, "0")[0..4]
 end
 
-file = "../event_attendees.csv"
-puts "EventManager initialized."
-
-contents = CSV.open(
-  file,
-  headers: true,
-  header_converters: :symbol,
-)
-
-contents.each do |row|
-  name = row[:first_name]
-
-  zipcode = clean_zipcode(row[:zipcode])
-
-    legislators = civic_info.representative_info_by_address(
-      address: zipcode,
-      levels: "country",
-      roles: ["legislatorUpperBody", "legislatorLowerBody"]
-    )
-  puts legislators.class
-  puts legislators.methods.sort
-  # puts "#{name} #{zipcode} #{legislators}"
-  puts Google::Apis::CivicinfoV2::RepresentativeInfoResponse.instance_methods(false).sort
+def find_legislators(file, civic_info)
+  file_content = CSV.open(file, headers: true, header_converters: :symbol)
+  file_content.each do |row|
+    # binding.pry
+    city = row[:city]
+    state = row[:state]
+    name = row[:first_name]
+    zipcode = clean_zipcode(row[:zipcode])
+    begin
+      legislators = civic_info.representative_info_by_address(
+        address: zipcode,
+        levels: "country",
+        roles: ["legislatorUpperBody", "legislatorLowerBody"],
+      )
+      # puts legislators.methods
+      legislators = legislators.officials
+      # pp legislators
+    rescue
+      puts "You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials"
+      legislators = []
+    end
+    legislators.each do |legislator|
+      puts "#{name} #{city} #{state} #{zipcode} #{legislator.name} #{legislator.party}"
+        # p " #{legislator.instance_variables}"
+    end
+  end
 end
+
+find_legislators(file, civic_info)

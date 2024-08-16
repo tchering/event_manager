@@ -1,44 +1,39 @@
 require "csv"
 require "google/apis/civicinfo_v2"
 require "pry-byebug"
-require "pp"
 
 file = "../event_attendees.csv"
-
-civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
-# puts civic_info.methods
-# p civic_info.method(:representative_info_by_address).parameters
-# civic_info.key = "AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw"
-civic_info.key = File.read('../secret.key').strip
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, "0")[0..4]
 end
 
-def find_legislators(file, civic_info)
-  file_content = CSV.open(file, headers: true, header_converters: :symbol)
-  file_content.each do |row|
-    # binding.pry
-    city = row[:city]
-    state = row[:state]
-    name = row[:first_name]
-    zipcode = clean_zipcode(row[:zipcode])
-    begin
-      legislators = civic_info.representative_info_by_address(
-        address: zipcode,
-        levels: "country",
-        roles: ["legislatorUpperBody", "legislatorLowerBody"],
-      )
-      legislators = legislators.officials
-      # pp legislators
+def legislator_by_zipcode(zipcode)
+  civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
+  civic_info.key = File.read("../secret.key")
+  # p civic_info.method(:representative_info_by_address).parameters
+  begin
+    legislators = civic_info.representative_info_by_address(
+      address: zipcode,
+      levels: "country",
+      roles: ["legislatorUpperBody", "legislatorLowerBody"],
+    )
+    legislators = legislators.officials
+    legislator_names = legislators.map do |legislator|
+      legislator.name
+    end
+    legislator_names.join(",")
     rescue
-      puts "You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials"
-      legislators = []
-    end
-    legislators.each do |legislator|
-      puts "#{name} #{city} #{state} #{zipcode} #{legislator.name} #{legislator.party}"
-    end
+       'You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials'
   end
 end
 
-find_legislators(file, civic_info)
+file_content = CSV.open(file, headers: true, header_converters: :symbol)
+file_content.each do |row|
+  zipcode = clean_zipcode(row[:zipcode])
+  name = row[:first_name]
+  legislators = legislator_by_zipcode(zipcode)
+  puts "#{name} #{zipcode} #{legislators}"
+end
+
+# legislator_by_zipcode(4444)
