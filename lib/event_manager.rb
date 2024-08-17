@@ -79,11 +79,18 @@ file_content.each do |row|
   registration_days[registration_day] += 1
 end
 #Determining peak registration hours
-max_hour, max_count = registration_hours.max_by { |hour, count| count }
-puts "Peak registration hour:"
-puts "Hour #{max_hour}: #{max_count} registration "
+max_hours = registration_hours.values.max
+max_reg_hours = registration_hours.select { |hour, count| count == max_hours }
+
+puts "Max registration hours"
+max_reg_hours.each do |hour, count|
+  puts "#{hour}:00- with total count of #{count} people"
+end
 
 #Determining the day most people registered.
-day, count = registration_days.max_by { |day, count| count }
-puts "Peak registration day"
-puts "#{day}: #{count} people"
+max_days = registration_days.values.max
+max_reg_days = registration_days.select {|day,count| count == max_days}
+puts "Max registration days"
+max_reg_days.each do |day,count|
+  puts "#{day} - with total count of #{count} people"
+end

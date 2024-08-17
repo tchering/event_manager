@@ -1,7 +1,4 @@
-require 'date'
+numbers = {Sonam:3,Yangji:5,tchering:5,rubyina:2}
 
-date_string = "2023-10-05 14:35:00"
-
-strp_date = DateTime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-formatted_date = strp_date.strftime('%Y-%m-%d %H:%M')
-puts formatted_date
+max_count = numbers.values.max
+p max_count
