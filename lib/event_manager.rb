@@ -68,7 +68,7 @@ file_content.each do |row|
   template = File.read("../template.erb")
   erb_template = ERB.new(template)
   form_letter = erb_template.result(binding)
-  # save_thank_you_letter(id, form_letter)
+  save_thank_you_letter(id, form_letter)
   #!extracting hours from the date in csv file
   registration_date = DateTime.strptime(row[:regdate], "%m/%d/%y %H:%M")
   registration_hour = registration_date.hour
